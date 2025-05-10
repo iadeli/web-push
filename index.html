@@ -11,6 +11,8 @@
 
     <button onclick="subscribe()">Subscribe</button>
 
+    <textarea id="pushDataDisplay" rows="10" cols="50"></textarea>
+
     <script>
 
         addEventListener('load', async () => {
@@ -24,7 +26,10 @@
                 userVisibleOnly: true,
                 applicationServerKey: 'BH2Bz0O6IF_tNIg8fr6WQQsbRsrsgtaOq_01LgysXnNZBh-FLBOvnbM7d_jTl0Vd0byWcnMdlYZUAuV-6YANKXo'
             });
+
             console.log(JSON.stringify(push));
+            const pushDataElement = document.getElementById('pushDataDisplay');
+            pushDataElement.value = JSON.stringify(push, null, 2); // نمایش JSON با فرمت زیبا
         }
 
     </script>
