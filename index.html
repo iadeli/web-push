@@ -4,32 +4,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Push Notification Example</title>
 </head>
 
 <body>
 
-    <button onclick="subscribe()">Subscribe</button>
+    <button onclick="subscribe()">Subscribe to Push</button>
 
-    <textarea id="pushDataDisplay" rows="10" cols="50"></textarea>
+    <textarea id="pushDataDisplay" rows="10" cols="50" placeholder="Push Subscription Data"></textarea>
 
     <script>
 
         addEventListener('load', async () => {
+            // ثبت سرویس ورکر.
             let sw = await navigator.serviceWorker.register('./sw.js');
-            console.log(sw);
+            console.log('Service Worker registered:', sw);
         });
 
         async function subscribe() {
+            // دریافت سرویس ورکر فعال.
             let sw = await navigator.serviceWorker.ready;
+
+            // درخواست اشتراک در اعلان های پوش.
             let push = await sw.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: 'BH2Bz0O6IF_tNIg8fr6WQQsbRsrsgtaOq_01LgysXnNZBh-FLBOvnbM7d_jTl0Vd0byWcnMdlYZUAuV-6YANKXo'
+                applicationServerKey: 'BH2Bz0O6IF_tNIg8fr6WQQsbRsrsgtaOq_01LgysXnNZBh-FLBOvnbM7d_jTl0Vd0byWcnMdlYZUAuV-6YANKXo' // **کلید عمومی VAPID خود را جایگزین کنید**
             });
 
-            console.log(JSON.stringify(push));
-            const pushDataElement = document.getElementById('pushDataDisplay');
-            pushDataElement.value = JSON.stringify(push, null, 2); // نمایش JSON با فرمت زیبا
+            console.log('Push Subscription:', JSON.stringify(push));
+            document.getElementById('pushDataDisplay').value = JSON.stringify(push, null, 2); // نمایش در textarea
+
+            // **ارسال اطلاعات اشتراک به سرور دات نت**
+            await sendSubscriptionToServer(push);
+        }
+
+        async function sendSubscriptionToServer(subscription) {
+            try {
+                const response = await fetch('https://localhost:7085/push/subscribe', { // Endpoint سرور دات نت
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(subscription)
+                });
+
+                const data = await response.json();
+                console.log('Subscription sent to server:', data);
+                alert('Successfully subscribed to push notifications!'); // اطلاع رسانی به کاربر
+            } catch (error) {
+                console.error('Error sending subscription to server:', error);
+                alert('Failed to subscribe to push notifications.');
+            }
         }
 
     </script>
